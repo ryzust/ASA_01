@@ -7,8 +7,8 @@ class Frame:
         x_bounds: list[float], y_bounds: list[float]
     ) -> list[list[float]]:
         # Generate random points and sort them in ascendent form
-        x_coords = np.random.uniform(x_bounds[0], x_bounds[1], 2).sort()
-        y_coords = np.random.uniform(y_bounds[0], y_bounds[1], 2).sort()
+        x_coords = np.sort(np.random.uniform(x_bounds[0], x_bounds[1], 2))
+        y_coords = np.sort(np.random.uniform(y_bounds[0], y_bounds[1], 2))
 
         top_left_p = [x_coords[0], y_coords[1]]
         bottom_right_p = [x_coords[1], y_coords[0]]
@@ -38,14 +38,14 @@ class Frame:
             is_in_top_rectangle_x_bounds and is_in_top_rectangle_y_bounds
         )
 
-        is_out_bottom_rectangle_x_bounds = (
-            x <= self.bottom_rectangle[0][0] and x >= self.bottom_rectangle[1][0]
+        is_in_bottom_rectangle_x_bounds = (
+            x >= self.bottom_rectangle[0][0] and x <= self.bottom_rectangle[1][0]
         )
-        is_out_bottom_rectangle_y_bounds = (
-            y >= self.bottom_rectangle[0][1] and y <= self.bottom_rectangle[1][1]
+        is_in_bottom_rectangle_y_bounds = (
+            y <= self.bottom_rectangle[0][1] and y >= self.bottom_rectangle[1][1]
         )
-        is_out_bottom_rectangle = (
-            is_out_bottom_rectangle_x_bounds and is_out_bottom_rectangle_y_bounds
+        is_out_bottom_rectangle = not (
+            is_in_bottom_rectangle_x_bounds and is_in_bottom_rectangle_y_bounds
         )
 
         return is_inside_top_rectangle and is_out_bottom_rectangle
