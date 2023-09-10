@@ -1,3 +1,4 @@
+import random
 import numpy as np
 
 
@@ -27,6 +28,7 @@ class Frame:
 
     def is_positive(self, p: list[float]) -> bool:
         x, y = p
+
         # to be positive, the point must be inside the top rectangle but outside the bottom one
         is_in_top_rectangle_x_bounds = (
             x >= self.top_rectangle[0][0] and x <= self.top_rectangle[1][0]
@@ -49,3 +51,25 @@ class Frame:
         )
 
         return is_inside_top_rectangle and is_out_bottom_rectangle
+
+    def generate_positive_point(self) -> list[list[float]]:
+        x = np.random.uniform(self.top_rectangle[0][0], self.top_rectangle[1][0])
+        y = 0.0
+
+        x_doesnt_intersect_bottom_rectangle = (
+            x < self.bottom_rectangle[0][0] or x > self.bottom_rectangle[1][0]
+        )
+        if x_doesnt_intersect_bottom_rectangle:
+            y = np.random.uniform(self.top_rectangle[0][0], self.top_rectangle[1][0])
+        else:
+            y_generates_at_top = random.randint(0, 1) == 1
+            if y_generates_at_top:
+                y = np.random.uniform(
+                    self.top_rectangle[0][1], self.bottom_rectangle[0][1]
+                )
+            else:
+                y = np.random.uniform(
+                    self.bottom_rectangle[1][1], self.top_rectangle[1][1]
+                )
+
+        return [x, y]
