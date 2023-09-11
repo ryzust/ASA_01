@@ -1,75 +1,66 @@
 import random
 import numpy as np
+from Rectangle import Rectangle
 
 
 class Frame:
+    def __init__(self, outer_rectangle: Rectangle, inner_rectangle: Rectangle):
+        self.outer_rectangle = outer_rectangle
+        self.inner_rectangle = inner_rectangle
+
     @staticmethod
-    def generate_rectangle(
-        x_bounds: list[float], y_bounds: list[float]
-    ) -> list[list[float]]:
-        # Generate random points and sort them in ascendent form
-        x_coords = np.sort(np.random.uniform(x_bounds[0], x_bounds[1], 2))
-        y_coords = np.sort(np.random.uniform(y_bounds[0], y_bounds[1], 2))
+    def generate_random_frame() -> "Frame":
+        outer_rectangle = Rectangle.generate_random_rectangle([0, 1], [0, 1])
+        outer_rectangle_x_bounds = [
+            outer_rectangle.top_left_point[0],
+            outer_rectangle.bottom_right_point[0],
+        ]
+        outer_rectangle_y_bounds = [
+            outer_rectangle.bottom_right_point[1],
+            outer_rectangle.top_left_point[1],
+        ]
 
-        top_left_p = [x_coords[0], y_coords[1]]
-        bottom_right_p = [x_coords[1], y_coords[0]]
-
-        return [top_left_p, bottom_right_p]
-
-    def __init__(self):
-        tr_top_left_p, tr_bottom_right_p = Frame.generate_rectangle([0, 1], [0, 1])
-        br_top_left_p, br_bottom_right_p = Frame.generate_rectangle(
-            [tr_top_left_p[0], tr_bottom_right_p[0]],
-            [tr_top_left_p[1], tr_bottom_right_p[1]],
+        inner_rectangle = Rectangle.generate_random_rectangle(
+            outer_rectangle_x_bounds, outer_rectangle_y_bounds
         )
-
-        self.top_rectangle = [tr_top_left_p, tr_bottom_right_p]
-        self.bottom_rectangle = [br_top_left_p, br_bottom_right_p]
+        return Frame(outer_rectangle, inner_rectangle)
 
     def is_positive(self, p: list[float]) -> bool:
-        x, y = p
-
         # to be positive, the point must be inside the top rectangle but outside the bottom one
-        is_in_top_rectangle_x_bounds = (
-            x >= self.top_rectangle[0][0] and x <= self.top_rectangle[1][0]
-        )
-        is_in_top_rectangle_y_bounds = (
-            y <= self.top_rectangle[0][1] and y >= self.top_rectangle[1][1]
-        )
-        is_inside_top_rectangle = (
-            is_in_top_rectangle_x_bounds and is_in_top_rectangle_y_bounds
-        )
+        is_in_outer_rectangle = self.outer_rectangle.is_contained(p)
+        is_out_inner_rectangle = not self.inner_rectangle.is_contained(p)
 
-        is_in_bottom_rectangle_x_bounds = (
-            x >= self.bottom_rectangle[0][0] and x <= self.bottom_rectangle[1][0]
-        )
-        is_in_bottom_rectangle_y_bounds = (
-            y <= self.bottom_rectangle[0][1] and y >= self.bottom_rectangle[1][1]
-        )
-        is_out_bottom_rectangle = not (
-            is_in_bottom_rectangle_x_bounds and is_in_bottom_rectangle_y_bounds
-        )
+        return is_in_outer_rectangle and is_out_inner_rectangle
 
-        return is_inside_top_rectangle and is_out_bottom_rectangle
-
-    def generate_positive_point(self) -> list[list[float]]:
-        x = np.random.uniform(self.top_rectangle[0][0], self.top_rectangle[1][0])
+    def generate_positive_point(self) -> list[float]:
+        """Generates a [x,y] random positive point within the boundaries of the frame"""
+        x = np.random.uniform(
+            self.outer_rectangle.top_left_point[0],
+            self.outer_rectangle.bottom_right_point[0],
+        )
         y = 0.0
 
-        x_doesnt_intersect_bottom_rectangle = (
-            x < self.bottom_rectangle[0][0] or x > self.bottom_rectangle[1][0]
+        x_doesnt_intersect_inner_rectangle = (
+            x < self.inner_rectangle.top_left_point[0]
+            or x > self.inner_rectangle.bottom_right_point[0]
         )
-        if x_doesnt_intersect_bottom_rectangle:
-            y = np.random.uniform(self.top_rectangle[0][0], self.top_rectangle[1][0])
+        if x_doesnt_intersect_inner_rectangle:
+            y = np.random.uniform(
+                self.outer_rectangle.top_left_point[1],
+                self.outer_rectangle.bottom_right_point[1],
+            )
+            return [x, y]
+
+        y_generates_at_top = random.randint(0, 1) == 1
+        if y_generates_at_top:
+            y = np.random.uniform(
+                self.outer_rectangle.top_left_point[1],
+                self.inner_rectangle.top_left_point[1],
+            )
         else:
-            y_generates_at_top = random.randint(0, 1) == 1
-            if y_generates_at_top:
-                y = np.random.uniform(
-                    self.top_rectangle[0][1], self.bottom_rectangle[0][1]
-                )
-            else:
-                y = np.random.uniform(
-                    self.bottom_rectangle[1][1], self.top_rectangle[1][1]
-                )
+            y = np.random.uniform(
+                self.inner_rectangle.bottom_right_point[1],
+                self.outer_rectangle.bottom_right_point[1],
+            )
 
         return [x, y]
