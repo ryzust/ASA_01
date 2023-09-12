@@ -4,8 +4,8 @@ from Rectangle import Rectangle
 
 
 class Model:
-    def __init__(self, f: Frame):
-        self.f = f
+    def __init__(self):
+        pass
 
     def _update_border_coords(border_coords, example):
         for i, val in enumerate(example):
@@ -18,11 +18,15 @@ class Model:
 
     def _get_border_coords(X: np.ndarray) -> np.ndarray:
         """returns a 2 * len(x[0]) dimensional array containing the minimum and maximum values for each dimension in X"""
-        n_dimensions = len(X[0])
-        border_coords = np.zeros(n_dimensions * 2)
+        if len(X) == 0:
+            # If there are no elements in X, returns the limits of the canvas
+            # return np.array([0, 1, 0, 1])
+            return np.array([1, 0, 1, 0])
+        # initialize the border values with the worst values
+        border_coords = [1, 0, 1, 0]
         for example in X:
             Model._update_border_coords(border_coords, example)
-        return border_coords
+        return np.array(border_coords)
 
     def fit(self, X: np.ndarray, y: np.ndarray):
         """Fits the model with the X examples and y labels"""
@@ -38,23 +42,22 @@ class Model:
         left_rectangle = Rectangle(
             [0, border_coords[3]], [border_coords[0], border_coords[2]]
         )
-        upper_rectangle = Rectangle(
-            [border_coords[0], 1], [border_coords[1], border_coords[3]]
-        )
-        lower_rectangle = Rectangle(
-            [border_coords[0], border_coords[2]], [border_coords[1], 1]
-        )
-
         # right rectangle contained points...
         r_r_contained_points = right_rectangle.get_contained_points(negative_points)
         lf_r_contained_points = left_rectangle.get_contained_points(negative_points)
+
+        # the min x for the negative points in the right will be the max for the outer rectangle...
+        outer_max_x, _, _, _ = Model._get_border_coords(r_r_contained_points)
+        _, outer_min_x, _, _ = Model._get_border_coords(lf_r_contained_points)
+
+        upper_rectangle = Rectangle([outer_min_x, 1], [outer_max_x, border_coords[3]])
+        lower_rectangle = Rectangle([outer_min_x, border_coords[2]], [outer_max_x, 0])
+
         u_r_contained_points = upper_rectangle.get_contained_points(negative_points)
         lw_r_contained_points = lower_rectangle.get_contained_points(negative_points)
 
-        outer_min_x, _, _, _ = Model._get_border_coords(lf_r_contained_points)
-        _, outer_max_x, _, _ = Model._get_border_coords(r_r_contained_points)
-        _, _, outer_min_y, _ = Model._get_border_coords(lw_r_contained_points)
-        _, _, _, outer_max_y = Model._get_border_coords(u_r_contained_points)
+        _, _, outer_max_y, _ = Model._get_border_coords(u_r_contained_points)
+        _, _, _, outer_min_y = Model._get_border_coords(lw_r_contained_points)
 
         outer_rectangle = Rectangle(
             [outer_min_x, outer_max_y], [outer_max_x, outer_min_y]
@@ -73,12 +76,16 @@ class Model:
                 inner_max_x,
                 inner_min_y,
                 inner_max_y,
-            ) = Model._get_border_coords(lf_r_contained_points)
+            ) = Model._get_border_coords(negative_points_in_inner_rect)
 
             inner_rectangle = Rectangle(
                 [inner_min_x, inner_max_y], [inner_max_x, inner_min_y]
             )
 
+        self.left_rectangle = left_rectangle
+        self.right_rectangle = right_rectangle
+        self.upper_rectangle = upper_rectangle
+        self.lower_rectangle = lower_rectangle
         self.f_h = Frame(outer_rectangle, inner_rectangle)
 
     def predict(self, X: np.ndarray):
@@ -88,8 +95,8 @@ class Model:
                 "The frame hypothesis isn't defined. Make sure of training the model first"
             )
 
-        y_pred = np.zeros(len(X))
-        for i, x in enumerate(X):
-            y_pred[i] = self.f_h.is_positive(x)
+        y_pred = []
+        for example in X:
+            y_pred.append(self.f_h.is_positive(example))
 
-        return y_pred
+        return np.array(y_pred)
