@@ -25,10 +25,10 @@ class Rectangle:
         """Given a point [x,y] returns if the point is contained in the rectangle"""
         x, y = point
         is_in_rectangle_x_bounds = (
-            x >= self.top_left_point[0] and x <= self.bottom_right_point[0]
+            x > self.top_left_point[0] and x < self.bottom_right_point[0]
         )
         is_in_rectangle_y_bounds = (
-            y <= self.top_left_point[1] and y >= self.bottom_right_point[1]
+            y < self.top_left_point[1] and y > self.bottom_right_point[1]
         )
         is_in_rectangle = is_in_rectangle_x_bounds and is_in_rectangle_y_bounds
 
