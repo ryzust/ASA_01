@@ -4,7 +4,7 @@ from matplotlib.patches import Rectangle
 import numpy as np
 from Frame import Frame
 from Model import Model
-from sklearn.metrics import accuracy_score, classification_report
+from sklearn.metrics import accuracy_score
 
 
 def draw_rectangle(ax, rectangle: Rectangle, color: str = "blue", msg: str = ""):
