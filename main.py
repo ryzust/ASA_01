@@ -4,7 +4,13 @@ from matplotlib.patches import Rectangle
 import numpy as np
 from Frame import Frame
 from Model import Model
-from sklearn.metrics import accuracy_score, classification_report
+from sklearn.metrics import (
+    accuracy_score,
+    recall_score,
+    precision_score,
+    f1_score,
+    fbeta_score,
+)
 
 
 def draw_rectangle(ax, rectangle: Rectangle, color: str = "blue", msg: str = ""):
@@ -24,6 +30,14 @@ def plot_points_by_class(ax, points, labels):
             continue
 
         ax.plot(point[0], point[1], "rx")
+
+
+def custom_report(y_true, y_pred, msg=""):
+    print(f"Report for {msg}:")
+    print(f"\tAccuracy: {accuracy_score(y_true,y_pred)}")
+    print(f"\tPrecision: {precision_score(y_true,y_pred)}")
+    print(f"\tRecall: {recall_score(y_true,y_pred)}")
+    print(f"\tF1-Score: {f1_score(y_true,y_pred)}")
 
 
 if __name__ == "__main__":
@@ -76,7 +90,7 @@ if __name__ == "__main__":
 
         fig, ax = plt.subplots(ncols=2)
         plt.tight_layout()
-        ax[0].set_title("Training set")
+        ax[0].set_title("Learning set")
         ax[1].set_title("Test set")
         plot_points_by_class(ax[0], X_train, y_train)
         plot_points_by_class(ax[1], X_test, y_test)
@@ -88,10 +102,8 @@ if __name__ == "__main__":
         model = Model()
         model.fit(X_train, y_train)
         y_pred = model.predict(X_test)
-        print(
-            f"Accuracy reached on training set: {accuracy_score(y_train,model.predict(X_train))}"
-        )
-        print(f"Accuracy reached on test set: {accuracy_score(y_test,y_pred)}")
+        custom_report(y_train, model.predict(X_train), "learning set")
+        custom_report(y_test, y_pred, "test set")
 
         draw_rectangle(ax[0], model.f_h.outer_rectangle, color="purple", msg=r"$M_h$")
         draw_rectangle(ax[0], model.f_h.inner_rectangle, color="purple")
