@@ -11,7 +11,7 @@ def draw_rectangle(ax, rectangle: Rectangle, color: str = "blue", msg: str = "")
     p1, p2 = rectangle.top_left_point, rectangle.bottom_right_point
     w = p2[0] - p1[0]
     h = p1[1] - p2[1]
-    ax.text(p2[0], p2[1], msg, color=color)
+    ax.text(p2[0], p2[1], msg, color=color, fontsize=16)
     ax.add_patch(Rectangle((p1[0], p2[1]), w, h, fill=False, color=color))
 
 
@@ -39,6 +39,13 @@ if __name__ == "__main__":
         n += int((n * 0.2) / 0.8)
 
         points = np.random.random([n, 2])
+        x_min_limit = f.outer_rectangle.top_left_point[0] - 0.1
+        x_max_limit = f.outer_rectangle.bottom_right_point[0] + 0.1
+        y_min_limit = f.outer_rectangle.bottom_right_point[1] - 0.1
+        y_max_limit = f.outer_rectangle.top_left_point[1] + 0.1
+
+        points[:, 0] = points[:, 0] * (x_max_limit - x_min_limit) + x_min_limit
+        points[:, 1] = points[:, 1] * (y_max_limit - y_min_limit) + y_min_limit
         # true if positive, false if negative
         labels = np.array([f.is_positive(x) for x in points])
         n_positive_examples = len(labels[: int(n * 0.8)][labels[: int(n * 0.8)]])
