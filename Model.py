@@ -78,6 +78,11 @@ class Model:
                 inner_max_y,
             ) = Model._get_border_coords(negative_points_in_inner_rect)
 
+            inner_min_x -= 0.0001
+            inner_max_x += 0.0001
+            inner_min_y -= 0.0001
+            inner_max_y += 0.0001
+
             inner_rectangle = Rectangle(
                 [inner_min_x, inner_max_y], [inner_max_x, inner_min_y]
             )
